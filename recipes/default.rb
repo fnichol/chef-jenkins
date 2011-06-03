@@ -67,6 +67,13 @@ node[:jenkins][:server][:plugins].each do |name|
   end
 end
 
+template "#{node[:jenkins][:server][:home]}/config.xml" do
+  source "config.xml.erb"
+  variables(:executors => node[:jenkins][:server][:executors])
+  owner node[:jenkins][:server][:user]
+  group node[:jenkins][:server][:group]
+end
+  
 case node.platform
 when "ubuntu", "debian"
   # See http://jenkins-ci.org/debian/
