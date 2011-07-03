@@ -1,14 +1,15 @@
-= DESCRIPTION:
+# DESCRIPTION
 
-Installs and configures Jenkins CI server & node slaves.  Resource providers to support automation via jenkins-cli, including job create/update.
+Installs and configures Jenkins CI server & node slaves. Resource providers
+to support automation via jenkins-cli, including job create/update.
 
-= REQUIREMENTS:
+# REQUIREMENTS
 
-== Chef:
+## Chef
 
 * Chef version 0.9.10 or higher
 
-== Platform:
+## Platform
 
 * 'default' - Server installation - currently supports Red Hat/CentOS 5.x and Ubuntu 8.x/9.x/10.x
 
@@ -18,23 +19,23 @@ Installs and configures Jenkins CI server & node slaves.  Resource providers to 
 
 * 'node_windows' - Windows platforms only.  Depends on .NET Framework, which can be installed with the windows::dotnetfx recipe.
 
-== Java:
+## Java
 
 Jenkins requires Java 1.5 or higher, which can be installed via the Opscode java cookbook or windows::java recipe.
 
-== Jenkins node authentication:
+## Jenkins node authentication
 
 If your Jenkins instance requires authentication, you'll either need to embed user:pass in the jenkins.server.url or issue a jenkins-cli.jar login command prior to using the jenkins::node_* recipes.  For example, define a role like so:
 
-  name "jenkins_ssh_node"
-  description "cli login & register ssh slave with Jenkins"
-  run_list %w(vmw::jenkins_login jenkins::node_ssh)
+    name "jenkins_ssh_node"
+    description "cli login & register ssh slave with Jenkins"
+    run_list %w(vmw::jenkins_login jenkins::node_ssh)
 
 Where the jenkins_login recipe is simply:
 
-  jenkins_cli "login --username #{node[:jenkins][:username]} --password #{node[:jenkins][:password]}"
+    jenkins_cli "login --username #{node[:jenkins][:username]} --password #{node[:jenkins][:password]}"
 
-= ATTRIBUTES: 
+# ATTRIBUTES
 
 * jenkins[:mirror] - Base URL for downloading Jenkins (server)
 * jenkins[:java_home] - Java install path, used for for cli commands
@@ -53,7 +54,7 @@ Where the jenkins_login recipe is simply:
 * jenkins[:node][:launcher] - Node launch method, "jnlp", "ssh" or "command"
 * jenkins[:node][:availability] - "always" keeps node on-line, "demand" off-lines when idle
 * jenkins[:node][:in_demand_delay] - number of minutes for which jobs must be waiting in the queue before attempting to launch this slave.
-* jenkins[:node][:idle_delay] - number of minutes that this slave must remain idle before taking it off-line. 
+* jenkins[:node][:idle_delay] - number of minutes that this slave must remain idle before taking it off-line.
 * jenkins[:node][:env] - "Node Properties" -> "Environment Variables"
 * jenkins[:node][:user] - user the slave runs as
 * jenkins[:node][:ssh_host] - Hostname or IP Jenkins should connect to when launching an SSH slave
@@ -70,41 +71,41 @@ Where the jenkins_login recipe is simply:
 * jenkins[:http_proxy][:host_aliases] - optional list of other host aliases to respond to (empty by default)
 * jenkins[:http_proxy][:client_max_body_size] - max client upload size ("1024m" by default, nginx only)
 
-= USAGE:
+# USAGE
 
-== 'default' recipe
+## 'default' recipe
 
 Installs a Jenkins CI server using the http://jenkins-ci.org/redhat RPM.  The recipe also generates an ssh private key and stores the ssh public key in the node 'jenkins[:pubkey]' attribute for use by the node recipes.
 
-== 'node_ssh' recipe
+## 'node_ssh' recipe
 
-Creates the user and group for the Jenkins slave to run as and sets `.ssh/authorized_keys` to the 'jenkins[:pubkey]' attribute.  The 'jenkins-cli.jar'[1] is downloaded from the Jenkins server and used to manage the nodes via the 'groovy'[2] cli command.  Jenkins is configured to launch a slave agent on the node using its SSH slave plugin[3].
+Creates the user and group for the Jenkins slave to run as and sets `.ssh/authorized_keys` to the 'jenkins[:pubkey]' attribute.  The [jenkins-cli.jar][cli] is downloaded from the Jenkins server and used to manage the nodes via the [groovy][console] cli command.  Jenkins is configured to launch a slave agent on the node using its SSH [slave plugin][slave_plugin].
 
-[1] http://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI
-[2] http://wiki.jenkins-ci.org/display/JENKINS/Jenkins+Script+Console
-[3] http://wiki.jenkins-ci.org/display/JENKINS/SSH+Slaves+plugin
+[cli]:          http://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI
+[console]:      http://wiki.jenkins-ci.org/display/JENKINS/Jenkins+Script+Console
+[slave_plugin]: http://wiki.jenkins-ci.org/display/JENKINS/SSH+Slaves+plugin
 
-== 'node_jnlp' recipe
+## 'node_jnlp' recipe
 
 Creates the user and group for the Jenkins slave to run as and '/jnlpJars/slave.jar' is downloaded from the Jenkins server.  Depends on runit_service from the runit cookbook.
 
-== 'node_windows' recipe
+## 'node_windows' recipe
 
-Creates the home directory for the node slave and sets 'JENKINS_HOME' and 'JENKINS_URL' system environment variables.  The 'winsw'[1] Windows service wrapper will be downloaded and installed, along with generating `jenkins-slave.xml` from a template.  Jenkins is configured with the node as a 'jnlp'[2] slave and '/jnlpJars/slave.jar' is downloaded from the Jenkins server.  The 'jenkinsslave' service will be started the first time the recipe is run or if the service is not running.  The 'jenkinsslave' service will be restarted if '/jnlpJars/slave.jar' has changed.  The end results is functionally the same had you chosen the option to "Let Jenkins control this slave as a Windows service"[3].
+Creates the home directory for the node slave and sets 'JENKINS_HOME' and 'JENKINS_URL' system environment variables.  The [winsw][winsw] Windows service wrapper will be downloaded and installed, along with generating `jenkins-slave.xml` from a template.  Jenkins is configured with the node as a [jnlp][jnlp] slave and '/jnlpJars/slave.jar' is downloaded from the Jenkins server.  The 'jenkinsslave' service will be started the first time the recipe is run or if the service is not running.  The 'jenkinsslave' service will be restarted if '/jnlpJars/slave.jar' has changed.  The end results is functionally the same had you chosen the option to [Let Jenkins control this slave as a Windows service][win_service].
 
-[1] http://weblogs.java.net/blog/2008/09/29/winsw-windows-service-wrapper-less-restrictive-license
-[2] http://wiki.jenkins-ci.org/display/JENKINS/Distributed+builds
-[3] http://wiki.jenkins-ci.org/display/JENKINS/Installing+Jenkins+as+a+Windows+service
+[winsw]:        http://weblogs.java.net/blog/2008/09/29/winsw-windows-service-wrapper-less-restrictive-license
+[jnlp]:         http://wiki.jenkins-ci.org/display/JENKINS/Distributed+builds
+[win_service]:  http://wiki.jenkins-ci.org/display/JENKINS/Installing+Jenkins+as+a+Windows+service
 
-== 'proxy_nginx' recipe
+## 'proxy_nginx' recipe
 
 Uses the nginx::source recipe from the nginx cookbook to install an HTTP frontend proxy. To automatically activate this recipe set the `node[:jenkins][:http_proxy][:variant]` to `nginx`.
 
-== 'proxy_apache2' recipe
+## 'proxy_apache2' recipe
 
 Uses the apache2 recipe from the apache2 cookbook to install an HTTP frontend proxy. To automatically activate this recipe set the `node[:jenkins][:http_proxy][:variant]` to `apache2`.
 
-== 'jenkins_cli' resource provider
+## 'jenkins_cli' resource provider
 
 This resource can be used to execute the Jenkins cli from your recipes.  For example, install plugins via update center and restart Jenkins:
 
@@ -113,7 +114,7 @@ This resource can be used to execute the Jenkins cli from your recipes.  For exa
       jenkins_cli "safe-restart"
     end
 
-== 'jenkins_node' resource provider
+## 'jenkins_node' resource provider
 
 This resource can be used to configure nodes as the 'node_ssh' and 'node_windows' recipes do or "Launch slave via execution of command on the Master".
 
@@ -126,11 +127,11 @@ This resource can be used to configure nodes as the 'node_ssh' and 'node_windows
       env          "ANT_HOME" => "/usr/local/ant", "M2_REPO" => "/dev/null"
     end
 
-== 'jenkins_job' resource provider
+## 'jenkins_job' resource provider
 
 This resource manages jenkins jobs, supporting the following actions:
 
-   :create, :update, :delete, :build, :disable, :enable
+    :create, :update, :delete, :build, :disable, :enable
 
 The 'create' and 'update' actions require a jenkins job config.xml.  Example:
 
@@ -151,19 +152,19 @@ The 'create' and 'update' actions require a jenkins job config.xml.  Example:
       notifies :build, resources(:jenkins_job => job_name), :immediately
     end
 
-== 'manage_node' library
+## 'manage_node' library
 
 The script to generate groovy that manages a node can be used standalone.  For example:
 
     % ruby manage_node.rb name slave-hostname remote_fs /home/jenkins ... | java -jar jenkins-cli.jar -s http://jenkins:8080/ groovy =
 
-= ISSUES
+# ISSUES
 
 * CLI authentication - http://issues.jenkins-ci.org/browse/JENKINS-3796
 
 * CLI *-node commands fail with "No argument is allowed: nameofslave" - http://issues.jenkins-ci.org/browse/JENKINS-5973
 
-= LICENSE & AUTHOR:
+# LICENSE & AUTHOR
 
 This is a downstream fork of Doug MacEachern's Hudson cookbook (https://github.com/dougm/site-cookbooks) and therefore deserves all the glory.
 
