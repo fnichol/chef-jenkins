@@ -109,6 +109,18 @@ when "ubuntu", "debian"
     include_recipe "apt"
     include_recipe "java"
 
+    # bypass apt-cacher client if included since Jenkins' repo issues 302
+    # HTTP redirects
+    file "/etc/apt/apt.conf.d/02nojenkinsproxy" do
+      owner     "root"
+      group     "root"
+      mode      "0644"
+      content   %{Acquire::http::Proxy::pkg.jenkins-ci.org "DIRECT";}
+
+      action    :create
+      only_if   { node.recipe?("apt::cacher-client") }
+    end
+
     cookbook_file "/etc/apt/sources.list.d/jenkins.list" do
       owner "root"
       group "root"
