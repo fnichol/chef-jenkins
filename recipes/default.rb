@@ -21,49 +21,49 @@
 # limitations under the License.
 #
 
-pkey = "#{node[:jenkins][:server][:home]}/.ssh/id_rsa"
+pkey = "#{node['jenkins']['server']['home']}/.ssh/id_rsa"
 tmp = "/tmp"
 
-user node[:jenkins][:server][:user] do
-  home node[:jenkins][:server][:home]
+user node['jenkins']['server']['user'] do
+  home node['jenkins']['server']['home']
 end
 
-directory node[:jenkins][:server][:home] do
+directory node['jenkins']['server']['home'] do
   recursive true
-  owner node[:jenkins][:server][:user]
-  group node[:jenkins][:server][:group]
+  owner node['jenkins']['server']['user']
+  group node['jenkins']['server']['group']
 end
 
-directory "#{node[:jenkins][:server][:home]}/.ssh" do
+directory "#{node['jenkins']['server']['home']}/.ssh" do
   mode 0700
-  owner node[:jenkins][:server][:user]
-  group node[:jenkins][:server][:group]
+  owner node['jenkins']['server']['user']
+  group node['jenkins']['server']['group']
 end
 
 execute "ssh-keygen -f #{pkey} -N ''" do
-  user  node[:jenkins][:server][:user]
-  group node[:jenkins][:server][:group]
+  user  node['jenkins']['server']['user']
+  group node['jenkins']['server']['group']
   not_if { File.exists?(pkey) }
 end
 
 ruby_block "store jenkins ssh pubkey" do
   block do
-    node.set[:jenkins][:server][:pubkey] = File.open("#{pkey}.pub") { |f| f.gets }
+    node.set['jenkins']['server']['pubkey'] = File.open("#{pkey}.pub") { |f| f.gets }
   end
 end
 
-directory "#{node[:jenkins][:server][:home]}/plugins" do
-  owner node[:jenkins][:server][:user]
-  group node[:jenkins][:server][:group]
-  only_if { node[:jenkins][:server][:plugins].size > 0 }
+directory "#{node['jenkins']['server']['home']}/plugins" do
+  owner node['jenkins']['server']['user']
+  group node['jenkins']['server']['group']
+  only_if { node['jenkins']['server']['plugins'].size > 0 }
 end
 
-node[:jenkins][:server][:plugins].each do |name|
-  remote_file "#{node[:jenkins][:server][:home]}/plugins/#{name}.hpi" do
-    source "#{node[:jenkins][:mirror]}/latest/#{name}.hpi"
+node['jenkins']['server']['plugins'].each do |name|
+  remote_file "#{node['jenkins']['server']['home']}/plugins/#{name}.hpi" do
+    source "#{node['jenkins']['mirror']}/latest/#{name}.hpi"
     backup false
-    owner node[:jenkins][:server][:user]
-    group node[:jenkins][:server][:group]
+    owner node['jenkins']['server']['user']
+    group node['jenkins']['server']['group']
   end
 end
 
@@ -73,7 +73,7 @@ when "ubuntu", "debian"
 
   case node.platform
   when "debian"
-    remote = "#{node[:jenkins][:mirror]}/latest/debian/jenkins.deb"
+    remote = "#{node['jenkins']['mirror']}/latest/debian/jenkins.deb"
     package_provider = Chef::Provider::Package::Dpkg
 
     package "daemon"
@@ -84,7 +84,7 @@ when "ubuntu", "debian"
     package "psmisc"
 
     remote_file "#{tmp}/jenkins-ci.org.key" do
-      source "#{node[:jenkins][:mirror]}/debian/jenkins-ci.org.key"
+      source "#{node['jenkins']['mirror']}/debian/jenkins-ci.org.key"
     end
 
     execute "add-jenkins-key" do
@@ -120,13 +120,13 @@ when "ubuntu", "debian"
 when "centos", "redhat"
   #see http://jenkins-ci.org/redhat/
 
-  remote = "#{node[:jenkins][:mirror]}/latest/redhat/jenkins.rpm"
+  remote = "#{node['jenkins']['mirror']}/latest/redhat/jenkins.rpm"
   package_provider = Chef::Provider::Package::Rpm
   pid_file = "/var/run/jenkins.pid"
   install_starts_service = false
 
   execute "add-jenkins-key" do
-    command "rpm --import #{node[:jenkins][:mirror]}/redhat/jenkins-ci.org.key"
+    command "rpm --import #{node['jenkins']['mirror']}/redhat/jenkins-ci.org.key"
     action :nothing
   end
 
@@ -138,11 +138,11 @@ ruby_block "netstat" do
   block do
     10.times do
       if IO.popen("netstat -lnt").entries.select { |entry|
-          entry.split[3] =~ /:#{node[:jenkins][:server][:port]}$/
+          entry.split[3] =~ /:#{node['jenkins']['server']['port']}$/
         }.size == 0
         break
       end
-      Chef::Log.debug("service[jenkins] still listening (port #{node[:jenkins][:server][:port]})")
+      Chef::Log.debug("service[jenkins] still listening (port #{node['jenkins']['server']['port']})")
       sleep 1
     end
   end
@@ -152,7 +152,7 @@ end
 ruby_block "block_until_operational" do
   block do
     until IO.popen("netstat -lnt").entries.select { |entry|
-        entry.split[3] =~ /:#{node[:jenkins][:server][:port]}$/
+        entry.split[3] =~ /:#{node['jenkins']['server']['port']}$/
       }.size == 1
       Chef::Log.debug "service[jenkins] not listening on port #{node.jenkins.server.port}"
       sleep 1
@@ -202,13 +202,13 @@ else
     unless install_starts_service
       notifies :start, "service[jenkins]", :immediately
     end
-    if node[:jenkins][:server][:use_head] #XXX remove when CHEF-1848 is merged
+    if node['jenkins']['server']['use_head'] #XXX remove when CHEF-1848 is merged
       action :nothing
     end
   end
 
   http_request "HEAD #{remote}" do
-    only_if { node[:jenkins][:server][:use_head] } #XXX remove when CHEF-1848 is merged
+    only_if { node['jenkins']['server']['use_head'] } #XXX remove when CHEF-1848 is merged
     message ""
     url remote
     action :head
@@ -237,7 +237,7 @@ log "plugins updated, restarting jenkins" do
   only_if do
     if File.exists?(pid_file)
       htime = File.mtime(pid_file)
-      Dir["#{node[:jenkins][:server][:home]}/plugins/*.hpi"].select { |file|
+      Dir["#{node['jenkins']['server']['home']}/plugins/*.hpi"].select { |file|
         File.mtime(file) > htime
       }.size > 0
     end
@@ -245,7 +245,7 @@ log "plugins updated, restarting jenkins" do
 end
 
 # Front Jenkins with an HTTP server
-case node[:jenkins][:http_proxy][:variant]
+case node['jenkins']['http_proxy']['variant']
 when "nginx"
   include_recipe "jenkins::proxy_nginx"
 when "apache2"

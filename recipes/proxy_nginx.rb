@@ -21,34 +21,34 @@
 
 include_recipe "nginx::source"
 
-if node[:jenkins][:http_proxy][:www_redirect] == "enable"
+if node['jenkins']['http_proxy']['www_redirect'] == "enable"
   www_redirect = true
 else
   www_redirect = false
 end
 
-host_name = node[:jenkins][:http_proxy][:host_name] || node[:fqdn]
+host_name = node['jenkins']['http_proxy']['host_name'] || node['fqdn']
 
-template "#{node[:nginx][:dir]}/sites-available/jenkins.conf" do
+template "#{node['nginx']['dir']}/sites-available/jenkins.conf" do
   source      "nginx_jenkins.conf.erb"
   owner       'root'
   group       'root'
   mode        '0644'
   variables(
     :host_name        => host_name,
-    :host_aliases     => node[:jenkins][:http_proxy][:host_aliases],
-    :listen_ports     => node[:jenkins][:http_proxy][:listen_ports],
+    :host_aliases     => node['jenkins']['http_proxy']['host_aliases'],
+    :listen_ports     => node['jenkins']['http_proxy']['listen_ports'],
     :www_redirect     => www_redirect,
-    :max_upload_size  => node[:jenkins][:http_proxy][:client_max_body_size]
+    :max_upload_size  => node['jenkins']['http_proxy']['client_max_body_size']
   )
 
-  if File.exists?("#{node[:nginx][:dir]}/sites-enabled/jenkins.conf")
+  if File.exists?("#{node['nginx']['dir']}/sites-enabled/jenkins.conf")
     notifies  :restart, 'service[nginx]'
   end
 end
 
 nginx_site "jenkins.conf" do
-  if node[:jenkins][:http_proxy][:variant] == "nginx"
+  if node['jenkins']['http_proxy']['variant'] == "nginx"
     enable true
   else
     enable false
