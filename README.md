@@ -21,6 +21,30 @@ Ubuntu 8.x/9.x/10.x
 * 'node_windows' - Windows platforms only.  Depends on .NET Framework, which can
 be installed with the windows::dotnetfx recipe.
 
+## Cookbooks
+
+The `default` recipe has the following cookbook pre-requisites:
+
+* [apt][apt] cookbook from Opscode for Debian/Ubuntu platforms or the [fnichol
+github fork][apt_fork] which has chef-solo support
+* [java][java] cookbook from Opscode, the [windows::java][win_java] recipe from
+the [dougm github repo][dougm_repo], or manually installing Java 1.5 or higher
+
+The `jenkins::node_jnlp` recipe has an additional requirement on:
+
+* [runit][runit] cookbook from Opscode
+
+The `jenkins::node_windows` recipe has an additional requirement on:
+
+* [windows::dotnetfx][dotnet] recipe from the [dougm github repo][dougm_repo]
+
+[apt]:          http://community.opscode.com/cookbooks/apt
+[fnichol_fork]: https://github.com/fnichol/chef-apt
+[java]:         http://community.opscode.com/cookbooks/java
+[runit]:        http://community.opscode.com/cookbooks/runit
+[dotnet]:       https://github.com/dougm/site-cookbooks/tree/master/windows
+[dougm_repo]:   https://github.com/dougm/site-cookbooks/
+
 ## Java
 
 Jenkins requires Java 1.5 or higher, which can be installed via the Opscode java
@@ -29,7 +53,7 @@ cookbook or windows::java recipe.
 ## Jenkins node authentication
 
 If your Jenkins instance requires authentication, you'll either need to embed
-user:pass in the jenkins.server.url or issue a jenkins-cli.jar login command
+user:pass in the `server.url` or issue a jenkins-cli.jar login command
 prior to using the jenkins::node_* recipes.  For example, define a role like so:
 
     name "jenkins_ssh_node"
@@ -38,23 +62,23 @@ prior to using the jenkins::node_* recipes.  For example, define a role like so:
 
 Where the jenkins_login recipe is simply:
 
-    jenkins_cli "login --username #{node[:jenkins][:username]} --password #{node[:jenkins][:password]}"
+    jenkins_cli "login --username #{node['jenkins']['username']} --password #{node['jenkins']['password']}"
 
 # Recipes
 
 ## default
 
-Installs a Jenkins CI server using the http://jenkins-ci.org/redhat RPM.  The
+Installs a Jenkins CI server using a native package where available. The
 recipe also generates an ssh private key and stores the ssh public key in the
-node 'jenkins[:pubkey]' attribute for use by the node recipes.
+node `pubkey` attribute for use by the node recipes.
 
 ## node_ssh
 
 Creates the user and group for the Jenkins slave to run as and sets
-`.ssh/authorized_keys` to the 'jenkins[:pubkey]' attribute.  The
-[jenkins-cli.jar][cli] is downloaded from the Jenkins server and used to manage
-the nodes via the [groovy][console] cli command.  Jenkins is configured to
-launch a slave agent on the node using its SSH [slave plugin][slave_plugin].
+`.ssh/authorized_keys` to the `pubkey` attribute.  The [jenkins-cli.jar][cli] is
+downloaded from the Jenkins server and used to manage the nodes via the
+[groovy][console] cli command.  Jenkins is configured to launch a slave agent on
+the node using its SSH [slave plugin][slave_plugin].
 
 [cli]:          http://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI
 [console]:      http://wiki.jenkins-ci.org/display/JENKINS/Jenkins+Script+Console
@@ -231,9 +255,9 @@ Optional list of other host aliases to respond to (empty by default)
 
 Max client upload size ("1024m" by default, nginx only)
 
-# Usage
+# Resources & Providers
 
-## 'jenkins_cli' resource provider
+## jenkins_cli
 
 This resource can be used to execute the Jenkins cli from your recipes. For
 example, install plugins via update center and restart Jenkins:
@@ -243,7 +267,7 @@ example, install plugins via update center and restart Jenkins:
       jenkins_cli "safe-restart"
     end
 
-## 'jenkins_node' resource provider
+## jenkins_node
 
 This resource can be used to configure nodes as the 'node_ssh' and
 'node_windows' recipes do or "Launch slave via execution of command on the
@@ -258,7 +282,7 @@ Master".
       env          "ANT_HOME" => "/usr/local/ant", "M2_REPO" => "/dev/null"
     end
 
-## 'jenkins_job' resource provider
+## jenkins_job
 
 This resource manages jenkins jobs, supporting the following actions:
 
@@ -283,6 +307,8 @@ The 'create' and 'update' actions require a jenkins job config.xml.  Example:
       notifies :build, resources(:jenkins_job => job_name), :immediately
     end
 
+# Usage
+
 ## 'manage_node' library
 
 The script to generate groovy that manages a node can be used standalone. For
@@ -294,8 +320,18 @@ example:
 # Issues
 
 * CLI authentication - http://issues.jenkins-ci.org/browse/JENKINS-3796
-
 * CLI *-node commands fail with "No argument is allowed: nameofslave" - http://issues.jenkins-ci.org/browse/JENKINS-5973
+
+# Development
+
+* Source hosted at [GitHub][repo]
+* Report issues/Questions/Feature requests on [GitHub Issues][issues]
+
+Pull requests are very welcome! Make sure your patches are well tested.
+Ideally create a topic branch for every seperate change you make.
+
+[repo]:   https://github.com/fnichol/chef-jenkins
+[issues]: https://github.com/fnichol/chef-jenkins/issues
 
 # License & Author
 
@@ -305,7 +341,9 @@ This is a downstream fork of Doug MacEachern's Hudson cookbook
 Author:: Doug MacEachern (<dougm@vmware.com>)
 
 Contributor:: Fletcher Nichol <fnichol@nichol.ca>
+
 Contributor:: Roman Kamyk <rkj@go2.pl>
+
 Contributor:: Darko Fabijan <darko@renderedtext.com>
 
 Copyright:: 2010, VMware, Inc
