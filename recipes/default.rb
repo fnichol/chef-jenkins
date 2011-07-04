@@ -106,7 +106,6 @@ when "ubuntu", "debian"
 
   when "ubuntu"
     package_provider = Chef::Provider::Package::Apt
-    package "curl"
     key_url = "http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key"
 
     include_recipe "apt"
@@ -124,17 +123,11 @@ when "ubuntu", "debian"
       only_if   { node.recipe?("apt::cacher-client") }
     end
 
-    cookbook_file "/etc/apt/sources.list.d/jenkins.list" do
-      owner   "root"
-      group   "root"
-      mode    "0644"
-    end
+    apt_repository "jenkins" do
+      uri     "http://pkg.jenkins-ci.org/debian binary/"
+      key     key_url
 
-    execute "add-jenkins-key" do
-      command   "curl #{key_url} | apt-key add -"
-
-      action    :nothing
-      notifies  :run, "execute[apt-get update]", :immediately
+      action  :add
     end
   end
 
@@ -207,7 +200,6 @@ if node.platform == "ubuntu"
     command     "echo w00t"
     notifies    :stop,    "service[jenkins]", :immediately
     notifies    :create,  "ruby_block[netstat]", :immediately
-    notifies    :run,     "execute[add-jenkins-key]", :immediately
     notifies    :install, "package[jenkins]", :immediately
     unless install_starts_service
       notifies  :start,   "service[jenkins]", :immediately
