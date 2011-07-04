@@ -27,7 +27,7 @@ The `default` recipe has the following cookbook pre-requisites:
 
 * [apt][apt] cookbook from Opscode for Debian/Ubuntu platforms or the
 [fnichol github fork][apt_fork] which has chef-solo support
-* [java][java] cookbook from Opscode, the [windows/java][win_java] recipe from
+* [java][java] cookbook from Opscode, the [windows::java][win_java] recipe from
 the [dougm github repo][dougm_repo], or manually installing Java 1.5 or higher
 
 The `jenkins::node_jnlp` recipe has an additional requirement on:
@@ -41,6 +41,7 @@ The `jenkins::node_windows` recipe has an additional requirement on:
 [apt]:          http://community.opscode.com/cookbooks/apt
 [apt_fork]:     https://github.com/fnichol/chef-apt
 [java]:         http://community.opscode.com/cookbooks/java
+[win_java]:     https://github.com/dougm/site-cookbooks/tree/master/windows
 [runit]:        http://community.opscode.com/cookbooks/runit
 [dotnet]:       https://github.com/dougm/site-cookbooks/tree/master/windows
 [dougm_repo]:   https://github.com/dougm/site-cookbooks/
