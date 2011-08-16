@@ -72,7 +72,7 @@ end
 
 plugins.each do |name|
   remote_file "#{home_path}/plugins/#{name}.hpi" do
-    source  "#{mirror_url}/latest/#{name}.hpi"
+    source  "#{mirror_url}/plugins/#{name}/latest/#{name}.hpi"
     backup  false
     owner   server_user
     group   server_group
