@@ -110,7 +110,7 @@ when "ubuntu", "debian"
     execute "add-jenkins-key" do
       command "curl #{key_url} | apt-key add -"
       action :nothing
-      notifies :run, "execute[apt-get update]", :immediately
+      notifies :run, "execute[apt-get-update]", :immediately
     end
   end
 
