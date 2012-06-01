@@ -104,6 +104,13 @@ when "ubuntu", "debian"
       action :nothing
     end
 
+    template '/etc/default/jenkins' do
+      source 'jenkins.default.erb'
+      owner 'root'
+      group 'root'
+      mode '0644'
+      notifies :restart, 'service[jenkins]'
+    end
   when "ubuntu"
     include_recipe "apt"
     include_recipe "java"
