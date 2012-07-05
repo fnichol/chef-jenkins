@@ -11,7 +11,23 @@
 </VirtualHost>
 
 <% end -%>
+
+<% if node[:jenkins][:http_proxy][:force_ssl_mode] -%>
+# Redirect to SSL host
 <VirtualHost *:80>
+  ServerName <%= @host_name %>
+  <Location />
+    Redirect permanent / https://<%= @host_name %>/
+  </Location>
+</VirtualHost>
+<% end -%>
+
+<% if node[:jenkins][:http_proxy][:force_ssl_mode] -%>
+<VirtualHost *:443>
+  SSLEngine on
+<% else %>
+<VirtualHost *:80>
+<% end -%>
   ServerName        <%= @host_name %>
   ProxyRequests     Off
 <% @host_aliases.each do |a| -%>

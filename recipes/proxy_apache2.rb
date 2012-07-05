@@ -21,6 +21,10 @@
 
 include_recipe "apache2"
 
+if node[:jenkins][:http_proxy][:force_ssl_mode]
+  include_recipe "apache2::mod_ssl"
+end
+
 package_provider = Chef::Provider::Package::Apt
 package "libapache2-mod-proxy-html"
 
@@ -64,4 +68,5 @@ apache_site "jenkins" do
   else
     enable false
   end
+
 end
