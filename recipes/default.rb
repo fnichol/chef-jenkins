@@ -82,44 +82,27 @@ case node.platform
 when "ubuntu", "debian"
   # See http://jenkins-ci.org/debian/
 
-  case node.platform
-  when "debian"
-    remote = "#{node[:jenkins][:mirror]}/latest/debian/jenkins.deb"
-    package_provider = Chef::Provider::Package::Dpkg
+  include_recipe "apt"
+  include_recipe "java"
 
-    package "daemon"
-    # These are both dependencies of the jenkins deb package
-    package "jamvm"
-    package "openjdk-6-jre"
-
-    package "psmisc"
-    key_url = "http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key"
-
-    remote_file "#{tmp}/jenkins-ci.org.key" do
-      source "#{key_url}"
-    end
-
-    execute "add-jenkins-key" do
-      command "apt-key add #{tmp}/jenkins-ci.org.key"
-      action :nothing
-    end
-
-  when "ubuntu"
-    include_recipe "apt"
-    include_recipe "java"
-
-    apt_repository "jenkins" do
-      uri "http://pkg.jenkins-ci.org/debian"
-      distribution "binary/"
-      components [""]
-      key "http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key"
-      action :add
-    end
+  apt_repository "jenkins" do
+    uri "http://pkg.jenkins-ci.org/debian"
+    distribution "binary/"
+    components [""]
+    key "http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key"
+    action :add
   end
 
   pid_file = "/var/run/jenkins/jenkins.pid"
   install_starts_service = true
 
+  template '/etc/default/jenkins' do
+    source 'etc-default-jenkins.erb'
+    owner 'root'
+    group 'root'
+    mode '0644'
+    notifies :restart, 'service[jenkins]'
+  end
 
 when "centos", "redhat"
   #see http://jenkins-ci.org/redhat/

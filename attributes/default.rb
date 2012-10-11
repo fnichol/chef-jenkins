@@ -36,7 +36,7 @@ end
 
 default[:jenkins][:server][:port] = 8080
 default[:jenkins][:server][:host] = node[:fqdn]
-default[:jenkins][:server][:url]  = "http://#{node[:jenkins][:server][:host]}:#{node[:jenkins][:server][:port]}"
+default[:jenkins][:server][:url]  = "http://#{node[:jenkins][:server][:host]}:#{node[:jenkins][:server][:port]}#{node[:jenkins][:http_proxy][:prefix]}"
 
 default[:jenkins][:iptables_allow] = "enable"
 
@@ -114,9 +114,11 @@ default[:jenkins][:node][:jvm_options] = nil
 #jenkins master defaults to: "#{ENV['HOME']}/.ssh/id_rsa"
 default[:jenkins][:node][:ssh_private_key] = nil
 
+# HTTP Proxy
 default[:jenkins][:http_proxy][:variant]              = nil
 default[:jenkins][:http_proxy][:www_redirect]         = "disable"
 default[:jenkins][:http_proxy][:listen_ports]         = [ 80 ]
 default[:jenkins][:http_proxy][:host_name]            = nil
 default[:jenkins][:http_proxy][:host_aliases]         = []
 default[:jenkins][:http_proxy][:client_max_body_size] = "1024m"
+default[:jenkins][:http_proxy][:prefix]               = "/"
