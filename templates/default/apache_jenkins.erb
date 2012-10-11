@@ -18,15 +18,16 @@
   ServerAlias       <%= a %>
 <% end -%>
 
+<% proxied_url = "http://localhost:#{node[:jenkins][:server][:port]}#{node[:jenkins][:http_proxy][:prefix]}" -%>
   # Local reverse proxy authorization override
   # Most unix distribution deny proxy by default
   # (ie /etc/apache2/mods-enabled/proxy.conf in Ubuntu)
-  <Proxy http://localhost:<%= node[:jenkins][:server][:port] %>/*>
+  <Proxy <%= proxied_url %>*>
     Order deny,allow
     Allow from all
   </Proxy>
 
   ProxyPreserveHost on
-  ProxyPass         /  http://localhost:<%= node[:jenkins][:server][:port] %>/
-  ProxyPassReverse  /  http://localhost:<%= node[:jenkins][:server][:port] %>/
+  ProxyPass         <%= node[:jenkins][:http_proxy][:prefix] %> <%= proxied_url %>
+  ProxyPassReverse  <%= node[:jenkins][:http_proxy][:prefix] %> <%= proxied_url %>
 </VirtualHost>
