@@ -120,6 +120,13 @@ when "ubuntu", "debian"
   pid_file = "/var/run/jenkins/jenkins.pid"
   install_starts_service = true
 
+  template '/etc/default/jenkins' do
+    source 'etc-default-jenkins.erb'
+    owner 'root'
+    group 'root'
+    mode '0644'
+    notifies :restart, 'service[jenkins]'
+  end
 
 when "centos", "redhat"
   #see http://jenkins-ci.org/redhat/

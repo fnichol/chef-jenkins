@@ -34,9 +34,22 @@ else
   default[:jenkins][:server][:group] = node[:jenkins][:server][:user]
 end
 
+# HTTP Proxy
+default[:jenkins][:http_proxy][:variant]              = nil
+default[:jenkins][:http_proxy][:www_redirect]         = "disable"
+default[:jenkins][:http_proxy][:listen_ports]         = [ 80 ]
+default[:jenkins][:http_proxy][:host_name]            = nil
+default[:jenkins][:http_proxy][:host_aliases]         = []
+default[:jenkins][:http_proxy][:client_max_body_size] = "1024m"
+default[:jenkins][:http_proxy][:prefix]               = nil
+
 default[:jenkins][:server][:port] = 8080
 default[:jenkins][:server][:host] = node[:fqdn]
-default[:jenkins][:server][:url]  = "http://#{node[:jenkins][:server][:host]}:#{node[:jenkins][:server][:port]}"
+if default[:jenkins][:http_proxy][:prefix]
+  default[:jenkins][:server][:url]  = "http://#{node[:jenkins][:server][:host]}:#{node[:jenkins][:server][:port]}#{default[:jenkins][:http_proxy][:prefix]}"
+else
+  default[:jenkins][:server][:url]  = "http://#{node[:jenkins][:server][:host]}:#{node[:jenkins][:server][:port]}"
+end
 
 default[:jenkins][:iptables_allow] = "enable"
 
@@ -113,10 +126,3 @@ default[:jenkins][:node][:ssh_pass] = nil
 default[:jenkins][:node][:jvm_options] = nil
 #jenkins master defaults to: "#{ENV['HOME']}/.ssh/id_rsa"
 default[:jenkins][:node][:ssh_private_key] = nil
-
-default[:jenkins][:http_proxy][:variant]              = nil
-default[:jenkins][:http_proxy][:www_redirect]         = "disable"
-default[:jenkins][:http_proxy][:listen_ports]         = [ 80 ]
-default[:jenkins][:http_proxy][:host_name]            = nil
-default[:jenkins][:http_proxy][:host_aliases]         = []
-default[:jenkins][:http_proxy][:client_max_body_size] = "1024m"
