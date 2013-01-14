@@ -11,9 +11,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -111,8 +111,14 @@ def jenkins_node_manage(args)
   end
 
   return <<EOF
-import jenkins.model.*
-import jenkins.slaves.*
+import hudson.slaves.RetentionStrategy;
+import jenkins.plugins.sshslaves.SSHLauncher;
+import hudson.plugins.sshslaves.SSHLauncher;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
+import jenkins.model.Jenkins;
+import hudson.slaves.DumbSlave;
+import hudson.model.Node;
+
 
 app = Jenkins.instance
 env = #{env}
@@ -120,7 +126,7 @@ props = []
 
 def new_ssh_launcher(args) {
   Jenkins.instance.pluginManager.getPlugin("ssh-slaves").classLoader.
-    loadClass("jenkins.plugins.sshslaves.SSHLauncher").
+    loadClass("hudson.plugins.sshslaves.SSHLauncher").
       getConstructor([String, int, String, String, String, String] as Class[]).newInstance(args)
 }
 
