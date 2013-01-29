@@ -60,16 +60,16 @@ end
 
 node[:jenkins][:server][:plugins].each do |name|
   remote_file "#{node[:jenkins][:server][:home]}/plugins/#{name}.hpi" do
-    source "#{node[:jenkins][:mirror]}/latest/#{name}.hpi"
+    source "#{node[:jenkins][:mirror]}/#{name}/latest/#{name}.hpi"
     backup false
     owner node[:jenkins][:server][:user]
     group node[:jenkins][:server][:group]
     action :nothing
   end
 
-  http_request "HEAD #{node[:jenkins][:mirror]}/latest/#{name}.hpi" do
+  http_request "HEAD #{node[:jenkins][:mirror]}/#{name}/latest/#{name}.hpi" do
     message ""
-    url "#{node[:jenkins][:mirror]}/latest/#{name}.hpi"
+    url "#{node[:jenkins][:mirror]}/#{name}/latest/#{name}.hpi"
     action :head
     if File.exists?("#{node[:jenkins][:server][:home]}/plugins/#{name}.hpi")
       headers "If-Modified-Since" => File.mtime("#{node[:jenkins][:server][:home]}/plugins/#{name}.hpi").httpdate
